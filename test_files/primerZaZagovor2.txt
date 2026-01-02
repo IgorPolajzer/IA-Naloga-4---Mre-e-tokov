@@ -1,0 +1,13 @@
+8 12
+Maribor Ljubljana 3
+Maribor Celje 8
+Ljubljana Lukovica 10
+Ljubljana Postojna 10
+Celje Postojna 5
+Celje Koper 5
+Postojna Ajdovscina 1
+Postojna Lukovica 1
+Ajdovscina Lukovica 2
+Ajdovscina Koper 2
+Koper Piran 9
+Lukovica Piran 4
