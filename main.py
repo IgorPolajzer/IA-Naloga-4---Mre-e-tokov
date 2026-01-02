@@ -1,9 +1,9 @@
-from dataclasses import dataclass
-from collections import defaultdict
+from dataclasses import dataclass, field
+from collections import defaultdict, deque
 from enum import Enum
 
 
-class NodeState(Enum):
+class NodeStatus(Enum):
     WHITE = 0,
     GRAY = 1,
     BLACK = 2
@@ -11,12 +11,17 @@ class NodeState(Enum):
 
 @dataclass
 class Node:
-    predecessor: int
+    predecessor: str | None
     length: int
-    status: NodeState
-    index: int
+    status: NodeStatus
+    index: int = field(init=False)
     name: str
 
+    _counter: int = 0  # Class-level variable to track the index
+
+    def __post_init__(self):
+        self.index = Node._counter
+        Node._counter += 1
 
 
 # s => in=0, out>0; t => in>0, out=0
@@ -58,38 +63,69 @@ def parse_file(file_name):
     return graph, *find_s_t(graph)
 
 
-def get_cf(graph, p):
-    full_path_weights = []
-    for u in p:
-        path_weight_sum = 0
-        for v in graph[u]:
-            path_weight_sum += graph[u][v]
-        full_path_weights.append(path_weight_sum)
+def get_cf(graph, flows, p):
+    cf = float('inf')
+    for i in range(len(p)-1):
+        u = p[i]
+        v = p[i+1]
+        residual = graph[u][v] - flows[u][v]
 
-    return min(full_path_weights)
+        if residual < cf:
+            cf = residual
+
+    return cf
+
+
+def get_nodes_from_graph(graph, s):
+    nodes = {}
+
+    for u in graph:
+        if u not in nodes and u != s:
+            nodes[u] = Node(None, -1, NodeStatus.WHITE, u)
+
+        for v in graph[u]:
+            if v not in nodes and v != s:
+                nodes[v] = Node(None, -1, NodeStatus.WHITE, v)
+
+    return nodes
+
+
+def get_path(nodes, s, t):
+    path = []
+
+    if s == t:
+        path.append(t)
+    elif nodes[t].predecessor is not None:
+        path += get_path(nodes, s, nodes[t].predecessor)
+        path.append(nodes[t].name)
+
+    return path
 
 
 def bfs(graph, flows, s, t):
-    visited = {v: False for u in graph for v in graph[u]}
+    nodes = get_nodes_from_graph(graph, s)
 
-    queue = []
-    path = []
+    queue = deque()
 
-    queue.append(s)
-    visited[s] = True
+    nodes[s] = Node(None, 0, NodeStatus.GRAY, s)
+    queue.append(nodes[s])
 
     while queue:
+        u = queue.popleft()
+        u.status = NodeStatus.BLACK
 
-        u = queue.pop(0)
-        path.append(u)
-        # print(u, end="->")
+        if u.name == t:
+            return get_path(nodes, s, t)
 
-        for v in graph[u]:
-            if not visited[v] and (graph[u][v] - flows[u][v]) > 0:
-                queue.append(v)
-                visited[v] = True
+        # neighbours from v.
+        for v in graph[u.name]:
+            if nodes[v].status == NodeStatus.WHITE and (graph[u.name][v] - flows[u.name][v]) > 0:
+                nodes[v].predecessor = u.name
+                nodes[v].length = nodes[u.name].length + 1
+                nodes[v].status = NodeStatus.GRAY
+                queue.append(nodes[v])
 
-    return path
+    return None
 
 
 def edmonds_karp(graph, s, t):
@@ -101,9 +137,9 @@ def edmonds_karp(graph, s, t):
             flows[v][u] = 0
 
     p = bfs(graph, flows, s, t)
-    while p:
+    while p is not None:
         print(p)
-        cf_p = get_cf(graph, p)
+        cf_p = get_cf(graph, flows, p)
 
         for i in range(len(p) - 1):
             u = p[i]
@@ -121,7 +157,7 @@ def main():
     print("Ford–Fulkerson algorithm")
     print(100 * "=")
     # file_name = input("Provide the input file name (should be inside /test_files):")
-    file_name = "primerZaZagovor2.txt"
+    file_name = "vhod.txt"
 
     graph, s, t = parse_file(file_name)
 
