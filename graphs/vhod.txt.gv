@@ -1,0 +1,14 @@
+// vhod.txt
+digraph {
+	0 [fillcolor=green style=filled]
+	5 [fillcolor=red style=filled]
+	0 -> 1 [label="[0/16]"]
+	0 -> 2 [label="[0/13]"]
+	1 -> 2 [label="[0/10]"]
+	1 -> 3 [label="[0/12]"]
+	2 -> 4 [label="[0/14]"]
+	3 -> 2 [label="[0/9]"]
+	3 -> 5 [label="[0/20]"]
+	4 -> 3 [label="[0/7]"]
+	4 -> 5 [label="[0/4]"]
+}

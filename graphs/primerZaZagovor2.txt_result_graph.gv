@@ -1,0 +1,17 @@
+// primerZaZagovor2.txt_result_graph
+digraph {
+	Maribor [fillcolor=green style=filled]
+	Piran [fillcolor=red style=filled]
+	Maribor -> Ljubljana [label="[3/3]"]
+	Maribor -> Celje [label="[7/8]"]
+	Ljubljana -> Lukovica [label="[3/10]"]
+	Ljubljana -> Postojna [label="[0/10]"]
+	Celje -> Postojna [label="[2/5]"]
+	Celje -> Koper [label="[5/5]"]
+	Postojna -> Ajdovscina [label="[1/1]"]
+	Postojna -> Lukovica [label="[1/1]"]
+	Ajdovscina -> Lukovica [label="[0/2]"]
+	Ajdovscina -> Koper [label="[1/2]"]
+	Koper -> Piran [label="[6/9]"]
+	Lukovica -> Piran [label="[4/4]"]
+}
