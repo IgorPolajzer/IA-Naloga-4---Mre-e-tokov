@@ -5,26 +5,36 @@ import matplotlib.pyplot as plt
 
 NUMBER_OF_ITERATIONS = 10
 
+
 def test_time_vs_nodes(algorithm_func, algorithm_name):
+    global node_count
     results = []
 
     for i in range(1, 6):
-        graph, node_count, conn_count = parse_file(f"generated/generated_{i}.txt")
+        times_for_dimension = []
 
-        times = []
-        for j in range(NUMBER_OF_ITERATIONS + 1):
-            start = time.time()
-            max_flow, flows = ford_fulkerson(graph, 1, node_count, algorithm_func)
-            times.append((time.time() - start) * 1000)
+        for j in range(1, 11):
+            graph, node_count, conn_count = parse_file(f"generated/generated_{j}_{i}.txt")
 
-        results.append((int(node_count), min(times), sum(times) / len(times), max(times)))
+            times = []
+            for x in range(NUMBER_OF_ITERATIONS):
+                start = time.time()
+                ford_fulkerson(graph, 1, node_count, algorithm_func)
+                times.append((time.time() - start) * 1000)
 
-    results.sort(key=lambda x: x[0])
+            times_for_dimension.append(sum(times)/len(times))
 
-    nodes = [r[0] for r in results]
-    min_times = [r[1] for r in results]
-    avg_times = [r[2] for r in results]
-    max_times = [r[3] for r in results]
+        results.append((
+            int(node_count),
+            min(times_for_dimension),
+            sum(times_for_dimension) / len(times_for_dimension),
+            max(times_for_dimension)
+        ))
+
+    nodes = [dim[0] for dim in results]
+    min_times = [dim[1] for dim in results]
+    avg_times = [dim[2] for dim in results]
+    max_times = [dim[3] for dim in results]
 
     plt.figure(figsize=(10, 6))
     plt.plot(nodes, min_times, 'b-o', linewidth=2, markersize=8, label='Minimalni čas')
@@ -40,27 +50,34 @@ def test_time_vs_nodes(algorithm_func, algorithm_name):
 
 
 def test_time_vs_edges(algorithm_func, algorithm_name):
+    global conn_count
     results = []
 
-    for i in range(6, 10):
-        graph, node_count, conn_count = parse_file(f"generated/generated_{i}.txt")
-        node_count = int(node_count)
-        conn_count = int(conn_count)
+    for i in range(1, 6):
+        times_for_dimension = []
 
-        times = []
-        for j in range(NUMBER_OF_ITERATIONS + 1):
-            start = time.time()
-            max_flow, flows = ford_fulkerson(graph, 1, node_count, algorithm_func)
-            times.append((time.time() - start) * 1000)
+        for j in range(1, 11):
+            graph, node_count, conn_count = parse_file(f"generated/generated_{j}_{i}.txt")
 
-        results.append((conn_count, min(times), sum(times) / len(times), max(times)))
+            times = []
+            for x in range(NUMBER_OF_ITERATIONS):
+                start = time.time()
+                ford_fulkerson(graph, 1, node_count, algorithm_func)
+                times.append((time.time() - start) * 1000)
 
-    results.sort(key=lambda x: x[0])
+            times_for_dimension.append(sum(times)/len(times))
 
-    edges = [r[0] for r in results]
-    min_times = [r[1] for r in results]
-    avg_times = [r[2] for r in results]
-    max_times = [r[3] for r in results]
+        results.append((
+            int(conn_count),
+            min(times_for_dimension),
+            sum(times_for_dimension) / len(times_for_dimension),
+            max(times_for_dimension)
+        ))
+
+    edges = [dim[0] for dim in results]
+    min_times = [dim[1] for dim in results]
+    avg_times = [dim[2] for dim in results]
+    max_times = [dim[3] for dim in results]
 
     plt.figure(figsize=(10, 6))
     plt.plot(edges, min_times, 'b-o', linewidth=2, markersize=8, label='Minimalni čas')
@@ -114,16 +131,18 @@ def generate_test_files():
     generated_file_name = input("File name: ")
 
     pairs = [
-        (5, 20),  # full graph for 5 nodes
-        (10, 90),  # full graph for 10 nodes
-        (15, 210),  # full graph for 15 nodes
-        (20, 380),  # full graph for 20 nodes
-        (25, 600),  # full graph for 25 nodes
-        (30, 100),  # sparse graph for 30 nodes
+        # Full graphs
+        (5, 20),
+        (10, 90),
+        (15, 210),
+        (20, 380),
+        (25, 600),
+        # sparse graphs
+        (30, 100),
         (30, 250),
         (30, 500),
         (30, 700),
-        (30, 870)  # full graph for 30 nodes
+        (30, 870)
     ]
 
     for i in range (1, 11):
